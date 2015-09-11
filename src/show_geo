@@ -94,7 +94,8 @@ else:
         lat = gps['latitude']
         long = gps['longitude']
         map_type = 't'
-        zoom = '10'
+        zoom = '11'
         search_type = 'yp'
         url3 = "http://maps.google.com/maps?&z=%s&mrt=%s&t=%s&q=%s+%s" % (zoom, search_type, map_type, lat, long)
-        webbrowser.open(url3, new=0, autoraise=True)
+        url4 = "https://maps.google.com/maps?q=%s,%s&ll=%s,%s&z=%s" % (lat, long, lat, long, zoom)
+        webbrowser.open(url4, new=0, autoraise=True)
