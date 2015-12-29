@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding=utf-8
 import sys
 import re
@@ -12,7 +12,7 @@ import gtk
 try:
     from exifread import process_file as read_exif_from_file
 except ImportError as e:
-    print "exifred is not installed, please"
+    print("exifred is not installed, please")
     e.message = 'ExifRead is not installed.\nPlease install ExifRead, site: ' + \
                 'https://pypi.python.org/pypi/ExifRead\nYou may use pip: "pip install exifread".'
     raise e

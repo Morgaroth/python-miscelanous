@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import os
 import sys
 import subprocess
@@ -18,7 +18,7 @@ def execute(command, verbose=False):
 
     cmd = prepare_command()
     if verbose:
-        print "executing command:\n\t%s" % cmd
+        print("executing command:\n\t%s" % cmd)
     process = subprocess.Popen(cmd, env=os.environ.copy(), stdout=subprocess.PIPE)
     out, err = process.communicate()
     ret_code = process.returncode

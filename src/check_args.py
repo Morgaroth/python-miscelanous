@@ -10,4 +10,4 @@ parser.add_argument('-r', '--resize', type=int, metavar='percents',
 parser.add_argument('-s', '--max-size', type=float, metavar='max_size',
                     help='if passed, images will be resized to rich passed size.')
 args = parser.parse_args()
-print args
+print(args)

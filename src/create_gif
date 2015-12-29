@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import argparse
 import os
 import subprocess
@@ -19,7 +19,7 @@ def execute(command, verbose=False):
 
     cmd = prepare_command()
     if verbose:
-        print "executing command:\n\t%s" % cmd
+        print("executing command:\n\t%s" % cmd)
     process = subprocess.Popen(cmd, env=os.environ.copy(), stdout=subprocess.PIPE)
     out, err = process.communicate()
     ret_code = process.returncode
@@ -37,7 +37,7 @@ class convert_command(object):
             (out, err, ret) = execute(['convert', '-version'])
             if ret != 0:
                 raise Exception("convert method not installed in system.... install it before continue.")
-            print "convert command installed."
+            print("convert command installed.")
             ConvertChecked.checked = True
 
 
@@ -46,7 +46,7 @@ class CONVERT(convert_command):
     def convert_percent(percent, file_name, verbose=False):
         CONVERT.check_installation()
         output = "%d%%-%s" % (percent, file_name)
-        print "Converting %s using %d%% ratio to %s..." % (file_name, percent, output)
+        print("Converting %s using %d%% ratio to %s..." % (file_name, percent, output))
         return output, execute(['convert', file_name, '-quality', '100', '-resize', '%d%%' % percent, output], verbose)
 
 
@@ -55,7 +55,7 @@ class GIF(convert_command):
     def create(files_list, output, frames_per_second=3.0, verbose=False):
         GIF.check_installation()
         delay = int(100 * 1.0 / frames_per_second)
-        print "Making %s..." % output
+        print("Making %s..." % output)
         return execute(['convert', '-delay', str(delay), '-loop', '0'] + files_list + [output], verbose)
 
 
@@ -72,10 +72,10 @@ parser.add_argument('-v', '--verbose',
                     help='increase verbosity.')
 args = parser.parse_args()
 
-print "Arguments %s" % args
+print("Arguments %s" % args)
 
 if args.max_size is not None and args.resize is not None:
-    print "provided both --max-size (-s) and --resize (-r) options, they are exclusive, provide only one"
+    print("provided both --max-size (-s) and --resize (-r) options, they are exclusive, provide only one")
     exit(1)
 
 wd = os.getcwd()
@@ -90,14 +90,14 @@ if len(jpgs) != 0 and len(pngs) != 0:
     elif answer == 'png':
         imgs = pngs
     else:
-        print "Bad response, exiting."
+        print("Bad response, exiting.")
         exit(1)
 elif len(jpgs) != 0:
     imgs = jpgs
 elif len(pngs) != 0:
     imgs = pngs
 else:
-    print "No images in %s, exiting." % wd
+    print("No images in %s, exiting." % wd)
     exit(0)
 
 imgs = [img for img in imgs if img.startswith(args.prefix_of_input_files)]
@@ -111,13 +111,13 @@ def average_of_file_size(files, verbose=False):
     sizes = [os.path.getsize(fil) for fil in files]
     size_avg = sum(sizes) * 1.0 / len(sizes) / 1024 / 1024
     if verbose:
-        print "File size average: %.4fMB, calculated from sizes: %s" % (size_avg, sizes)
+        print("File size average: %.4fMB, calculated from sizes: %s" % (size_avg, sizes))
     return size_avg
 
 
 imgs.sort()
 
-name = raw_input('Provide name of gif: ')
+name = input('Provide name of gif: ')
 
 fpss = args.fps
 resize = args.resize

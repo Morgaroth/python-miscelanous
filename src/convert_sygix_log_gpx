@@ -17,6 +17,7 @@
 import sys
 import struct
 import datetime
+from _smbc import File
 from collections import OrderedDict
 import argparse
 # import xml.etree.ElementTree as ET
@@ -101,7 +102,7 @@ class SygicLogReader(object):
         # read format version magic
         version = self._struct_unpack_from_file(self._fmt_header_version)
         if version != ('5', 'F', 'R', 'T'):
-            raise ValueError, "Can't read this file format (version) :("
+            raise ValueError("Can't read this file format (version) :(")
         self.header["version"] = 5
 
         # read some fixed length int and byte and word fields
@@ -122,7 +123,7 @@ class SygicLogReader(object):
 
     def read_points(self):
         """Generator yielding each point as a dictionary. See class doc for details on available fields."""
-        for i in xrange(self.header["point count"]):
+        for i in range(self.header["point count"]):
             yield dict(zip(self._fmt_point_elem, self._struct_unpack_from_file(self._fmt_point)))
 
 
@@ -180,7 +181,7 @@ def main(fns_in, fn_out, tz_offset, track_name, track_desc):
     if not fn_out:
         fp_out = sys.stdout
     else:
-        fp_out = file(fn_out, "wb")
+        fp_out = File(fn_out, "wb")
 
     gpx_writer = GpxWriter(fp_out, track_name, track_desc)
 

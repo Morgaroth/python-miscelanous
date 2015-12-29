@@ -5,19 +5,22 @@ import sys
 from subprocess import Popen
 from os import remove, symlink
 from os.path import join, exists
-
 import errno
-
 from shutil import move
+
+"""
+    Script for updating IntelliJ EAP version, using downloaded by user tarball
+"""
+
 
 INTELLIJ = join('/', 'apps', 'IntelliJ')
 
 if len(sys.argv) < 2:
-    print ("missing arguments, provide file of IntelliJ to update")
+    print("missing arguments, provide file of IntelliJ to update")
     sys.exit(-1)
 
 if len(sys.argv) > 2:
-    print ("too much arguments, provide only file of IntelliJ to update")
+    print("too much arguments, provide only file of IntelliJ to update")
     sys.exit(-1)
 
 
@@ -42,7 +45,7 @@ name = candidates[0]
 target = join(INTELLIJ, name)
 
 if exists(target):
-    print ("Version %s already exists in /apps/IntelliJ")
+    print("Version %s already exists in /apps/IntelliJ")
     sys.exit(-2)
 
 move(join('/tmp', name), target)
