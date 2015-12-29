@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 # coding=utf-8
-import sys
 import re
-import pygtk
+import sys
 import webbrowser
 
-pygtk.require('2.0')
-
-import gtk
+from gi.repository import Gtk
 
 try:
     from exifread import process_file as read_exif_from_file
@@ -68,9 +65,9 @@ args = sys.argv[1:]
 # print str(args)
 
 if len(args) is not 2:
-    dialog = gtk.Dialog("ERROR", None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                        (gtk.STOCK_OK, gtk.RESPONSE_OK))
-    label = gtk.Label("Illegal arguments.")
+    dialog = Gtk.Dialog("ERROR", None, Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
+                        (Gtk.STOCK_OK, Gtk.DialogFlags.RESPONSE_OK))
+    label = Gtk.Label("Illegal arguments.")
     label.show()
     dialog.vbox.pack_start(label)
     dialog.run()
@@ -81,9 +78,9 @@ else:
     file_path = "%s/%s" % (directory, file_name)
     tags = get_geo_from_tags(get_exif(file_path))
     if tags is None:
-        dialog = gtk.Dialog("ERROR", None, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                            (gtk.STOCK_OK, gtk.RESPONSE_OK))
-        label = gtk.Label("The file %s\nhas no GPS localization." % file_path)
+        dialog = Gtk.Dialog("ERROR", None, Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
+                            (Gtk.STOCK_OK, Gtk.DialogFlags.RESPONSE_OK))
+        label = Gtk.Label("The file %s\nhas no GPS localization." % file_path)
         label.show()
         dialog.vbox.pack_start(label)
         dialog.run()
