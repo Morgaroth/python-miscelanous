@@ -71,7 +71,6 @@ if len(args) is not 2:
     label.show()
     dialog.vbox.pack_start(label)
     dialog.run()
-
 else:
     directory = args[0]
     file_name = args[1]

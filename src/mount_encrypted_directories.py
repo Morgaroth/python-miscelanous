@@ -62,6 +62,22 @@ def mount_own():
     mount('-OWN', passwords['own'])
 
 
+def open_explorer(dir):
+    Popen(['xdg-open', '--', '/mnt/ENC/DECRYPTED%s' % dir]).wait()
+
+
+def open_std():
+    open_explorer("")
+
+
+def open_prv():
+    open_explorer("-PRV")
+
+
+def open_own():
+    open_explorer("-OWN")
+
+
 if len(passwords) < 3:
     print("Nie odczytano haseł, odczytano tylko %s" % str(passwords.keys()))
     exit(2)
@@ -70,12 +86,17 @@ if 'all' in argv:
     mount_std()
     mount_prv()
     mount_own()
+    open_std()
 elif len(argv) == 0:
     mount_std()
+    open_std()
 else:
     if 'prv' in argv:
         mount_prv()
+        open_prv()
     if 'own' in argv:
         mount_own()
+        open_own()
     if 'std' in argv:
         mount_std()
+        open_std()
