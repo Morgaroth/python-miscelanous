@@ -115,7 +115,9 @@ def open_tmp():
     Popen(['xdg-open', tmp_dir]).wait()
 
 
-win = EntryWindow(create_gif_function, open_tmp)
+candidate = sorted(file_names)[0]
+gif_name_candidate = os.path.splitext(candidate)[0]
+win = EntryWindow(create_gif_function, open_tmp, gif_name=gif_name_candidate)
 win.connect("delete-event", Gtk.main_quit)
 win.show_all()
 Gtk.main()
