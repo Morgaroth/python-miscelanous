@@ -26,7 +26,6 @@ pw = getpass.getpass("Password to keepass database: ")
 passwords = {}
 try:
     with open_kdbx(filename, password=pw) as kdb:
-        # print(kdb.pretty_print().decode("unicode_escape"))
         entries = kdb.obj_root.findall('.//Entry')
         passwords_entry = next(
                 i for i in entries if len([k for k in i.getchildren() if k.tag == 'String' and k.Value == 'pliki']) > 0)
@@ -63,7 +62,7 @@ def mount_own():
 
 
 def open_explorer(dir):
-    Popen(['xdg-open', '--', '/mnt/ENC/DECRYPTED%s' % dir]).wait()
+    Popen(['open', '/mnt/ENC/DECRYPTED%s' % dir]).wait()
 
 
 def open_std():

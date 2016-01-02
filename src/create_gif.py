@@ -68,6 +68,10 @@ parser.add_argument('-s', '--max-size', type=float, metavar='max_size',
                     help='if passed, images will be resized to rich passed size.')
 parser.add_argument('-p', '--prefix-of-input-files', metavar='prefix', default='IMG',
                     help='prefix of input files to converting.')
+parser.add_argument('-f', '--gif-name', metavar='name', default=None,
+                    help='name for created gif.')
+parser.add_argument('-o', '--output', metavar='output', default='',
+                    help='output directory for created gif.')
 parser.add_argument('-v', '--verbose',
                     help='increase verbosity.')
 args = parser.parse_args()
@@ -117,7 +121,10 @@ def average_of_file_size(files, verbose=False):
 
 imgs.sort()
 
-name = input('Provide name of gif: ')
+if args.gif_name is None:
+    name = input('Provide name of gif: ')
+else:
+    name = args.gif_name
 
 fpss = args.fps
 resize = args.resize
@@ -129,8 +136,14 @@ if resize is None:
 if resize is not None:
     imgs = [f[0] for f in map(lambda f_n: CONVERT.convert_percent(resize, f_n, args.verbose), imgs)]
 
+output_prefix = ""
+if args.output is not None and len(args.output) > 0:
+    output_prefix = args.output
+    if not output_prefix.endswith('/'):
+        output_prefix += "/"
+
 if len(fpss) == 1:
-    GIF.create(imgs, '%s.gif' % name, int(fpss[0]), verbose=args.verbose)
+    GIF.create(imgs, '%s%s.gif' % (output_prefix, name), int(fpss[0]), verbose=args.verbose)
 else:
     for fps in fpss:
-        GIF.create(imgs, '%s-%sfps.gif' % (name, fps), float(fps), args.verbose)
+        GIF.create(imgs, '%s%s-%sfps.gif' % (output_prefix, name, fps), float(fps), args.verbose)
