@@ -3,7 +3,7 @@
 import os
 import sys
 import tempfile
-from os.path import join
+from os.path import join, basename
 from shutil import copyfile
 from subprocess import Popen
 
@@ -84,6 +84,7 @@ class EntryWindow(Gtk.Window):
 
 
 file_names = sys.argv[1:]
+file_names = [basename(f) for f in file_names]
 
 print("creating gif of %s" % str(file_names))
 cwd = os.getcwd()
@@ -92,6 +93,8 @@ print("env cwd", cwd, "files:", str(file_names))
 tmp_dir = tempfile.mkdtemp()
 gifs_path = join(tmp_dir, 'gifs')
 os.mkdir(gifs_path)
+
+print('tmp dir is', tmp_dir)
 
 
 def create_gif_function(gif_name, fpss, resize_type, resize_vaue):
