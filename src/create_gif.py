@@ -8,7 +8,7 @@ __author__ = 'mateusz'
 convert_checked = False
 
 
-def execute(command, verbose=False):
+def execute_async(command, verbose=False):
     def prepare_command():
         cmd = command
         if isinstance(cmd, str):
@@ -21,6 +21,11 @@ def execute(command, verbose=False):
     if verbose:
         print("executing command:\n\t%s" % cmd)
     process = subprocess.Popen(cmd, env=os.environ.copy(), stdout=subprocess.PIPE)
+    return process
+
+
+def execute(command, verbose=False):
+    process = execute_async(command, verbose)
     out, err = process.communicate()
     ret_code = process.returncode
     return out, err, ret_code
@@ -43,20 +48,36 @@ class convert_command(object):
 
 class CONVERT(convert_command):
     @staticmethod
-    def convert_percent(percent, file_name, verbose=False):
+    def convert_percent_async(percent, file_name, verbose=False):
         CONVERT.check_installation()
         output = "%d%%-%s" % (percent, file_name)
         print("Converting %s using %d%% ratio to %s..." % (file_name, percent, output))
-        return output, execute(['convert', file_name, '-quality', '100', '-resize', '%d%%' % percent, output], verbose)
+        return output, execute_async(['convert', file_name, '-quality', '100', '-resize', '%d%%' % percent, output],
+                                     verbose)
+
+    @staticmethod
+    def convert_percent(percent, file_name, verbose=False):
+        (output, process) = CONVERT.convert_percent_async(percent, file_name, verbose)
+        out, err = process.communicate()
+        print(out,err)
+        ret_code = process.returncode
+        return output, (out, err, ret_code)
 
 
 class GIF(convert_command):
     @staticmethod
-    def create(files_list, output, frames_per_second=3.0, verbose=False):
+    def create_async(files_list, output, frames_per_second=3.0, verbose=False):
         GIF.check_installation()
         delay = int(100 * 1.0 / frames_per_second)
         print("Making %s..." % output)
-        return execute(['convert', '-delay', str(delay), '-loop', '0'] + files_list + [output], verbose)
+        return execute_async(['convert', '-delay', str(delay), '-loop', '0'] + files_list + [output], verbose)
+
+    @staticmethod
+    def create(files_list, output, frames_per_second=3.0, verbose=False):
+        process = GIF.create_async(files_list, output, frames_per_second, verbose)
+        (out, err) = process.communicate()
+        ret_code = process.returncode
+        return out, err, ret_code
 
 
 parser = argparse.ArgumentParser(description='Converts images to smaller size & creates gifs.')
@@ -66,7 +87,7 @@ parser.add_argument('-r', '--resize', type=int, metavar='percents',
                     help='resize ratio in percents to resize images before create gif.')
 parser.add_argument('-s', '--max-size', type=float, metavar='max_size',
                     help='if passed, images will be resized to rich passed size.')
-parser.add_argument('-p', '--prefix-of-input-files', metavar='prefix', default='IMG',
+parser.add_argument('-p', '--prefix-of-input-files', metavar='prefix', default='',
                     help='prefix of input files to converting.')
 parser.add_argument('-f', '--gif-name', metavar='name', default=None,
                     help='name for created gif.')
@@ -74,6 +95,8 @@ parser.add_argument('-o', '--output', metavar='output', default='',
                     help='output directory for created gif.')
 parser.add_argument('-v', '--verbose',
                     help='increase verbosity.')
+parser.add_argument('--synchronous',
+                    help='execute synchronously.')
 args = parser.parse_args()
 
 print("Arguments %s" % args)
@@ -83,8 +106,8 @@ if args.max_size is not None and args.resize is not None:
     exit(1)
 
 wd = os.getcwd()
-jpgs = [jpg for jpg in os.listdir(wd) if jpg.endswith(".jpg") or jpg.endswith(".jpeg")]
-pngs = [png for png in os.listdir(wd) if png.endswith(".png")]
+jpgs = [jpg for jpg in os.listdir(wd) if jpg.lower().endswith(".jpg") or jpg.lower().endswith(".jpeg")]
+pngs = [png for png in os.listdir(wd) if png.lower().endswith(".png")]
 imgs = None
 
 if len(jpgs) != 0 and len(pngs) != 0:
@@ -133,8 +156,22 @@ if resize is None:
     if resize is not None:
         resize = int(resize * 100 / average_of_file_size(imgs, args.verbose) + 6)
 
-if resize is not None:
-    imgs = [f[0] for f in map(lambda f_n: CONVERT.convert_percent(resize, f_n, args.verbose), imgs)]
+
+def gif_create(data):
+    (images, output_prefix, name, verbose, fps) = data
+    return GIF.create(images, '%s%s-%sfps.gif' % (output_prefix, name, fps), float(fps), verbose)
+
+
+if args.synchronous:
+    if resize is not None:
+        imgs = [f[0] for f in map(lambda f_n: CONVERT.convert_percent(resize, f_n, args.verbose), imgs)]
+else:
+    if resize is not None:
+        processes = map(lambda f_n: CONVERT.convert_percent_async(resize, f_n, args.verbose), imgs)
+        imgs = []
+        for (res, proc) in processes:
+            proc.wait()
+            imgs.append(res)
 
 output_prefix = ""
 if args.output is not None and len(args.output) > 0:
@@ -145,5 +182,10 @@ if args.output is not None and len(args.output) > 0:
 if len(fpss) == 1:
     GIF.create(imgs, '%s%s.gif' % (output_prefix, name), int(fpss[0]), verbose=args.verbose)
 else:
-    for fps in fpss:
-        GIF.create(imgs, '%s%s-%sfps.gif' % (output_prefix, name, fps), float(fps), args.verbose)
+    if args.synchronous:
+        for fps in fpss:
+            GIF.create(imgs, '%s%s-%sfps.gif' % (output_prefix, name, fps), float(fps), args.verbose)
+    else:
+        processes = [GIF.create_async(imgs, '%s%s-%sfps.gif' % (output_prefix, name, fps), float(fps), args.verbose)
+                     for fps in fpss]
+        [p.wait() for p in processes]
